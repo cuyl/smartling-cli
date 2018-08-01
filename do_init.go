@@ -136,11 +136,11 @@ func doInit(config Config, args map[string]interface{}) error {
 		}
 	}
 
-	fmt.Println("Connection is successfull.")
+	fmt.Println("Connection is successful.")
 
 	if args["--dry-run"].(bool) {
 		fmt.Println()
-		fmt.Println("Dry run is specified, do not writing config.")
+		fmt.Println("Configured for Dry run. Not writing config file.")
 		fmt.Println("New config is displayed below.")
 		fmt.Println()
 
