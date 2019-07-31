@@ -331,7 +331,7 @@ func loadConfig(args map[string]interface{}) (Config, error) {
 	}
 
 	if config.ProjectID == "" {
-		config.Secret = os.Getenv("SMARTLING_PROJECT_ID")
+		config.ProjectID = os.Getenv("SMARTLING_PROJECT_ID")
 	}
 
 	if args["--user"] != nil {
