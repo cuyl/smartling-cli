@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"io/ioutil"
+	"os"
 	"path/filepath"
 	"strings"
 
@@ -17,7 +18,9 @@ func doFilesPush(
 	args map[string]interface{},
 ) error {
 	var (
+		failedFiles   []string
 		project       = config.ProjectID
+		result        error
 		file, _       = args["<file>"].(string)
 		uri, useURI   = args["<uri>"].(string)
 		branch, _     = args["--branch"].(string)
@@ -241,32 +244,51 @@ func doFilesPush(
 		response, err := client.UploadFile(project, request)
 
 		if err != nil {
-			return NewError(
-				hierr.Errorf(
-					err,
-					`unable to upload file "%s"`,
-					file,
-				),
+			if returnError(err) {
+				return NewError(
+					hierr.Errorf(
+						err,
+						`unable to upload file "%s"`,
+						file,
+					),
 
-				`Check, that you have enough permissions to upload file to`+
-					` the specified project`,
+					`Check, that you have enough permissions to upload file to`+
+						` the specified project`,
+				)
+			}
+			_, _ = os.Stderr.WriteString("Unable to upload file " + file)
+			failedFiles = append(failedFiles, file)
+		} else {
+			status := "new"
+			if response.Overwritten {
+				status = "overwritten"
+			}
+
+			fmt.Printf(
+				"%s (%s) %s [%d strings %d words]\n",
+				uri,
+				request.FileType,
+				status,
+				response.StringCount,
+				response.WordCount,
 			)
 		}
-
-		status := "new"
-		if response.Overwritten {
-			status = "overwritten"
-		}
-
-		fmt.Printf(
-			"%s (%s) %s [%d strings %d words]\n",
-			uri,
-			request.FileType,
-			status,
-			response.StringCount,
-			response.WordCount,
-		)
 	}
 
-	return nil
+	if len(failedFiles) != 0 {
+		result = NewError(fmt.Errorf("failed to upload %d files", len(failedFiles)), "failed to upload files "+strings.Join(failedFiles, ", "))
+	}
+
+	return result
+}
+
+func returnError(err error) bool {
+	apiError, isApiError := err.(smartling.APIError)
+	_, isNotAuthorized := err.(smartling.NotAuthorizedError)
+	return isNotAuthorized ||
+		(isApiError && strings.Contains(strings.Join([]string{
+			"AUTHENTICATION_ERROR",
+			"AUTHORIZATION_ERROR",
+			"MAINTENANCE_MODE_ERROR",
+		}, ","), apiError.Code))
 }
