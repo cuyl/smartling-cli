@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
+	"regexp"
 	"strings"
 
 	"github.com/Smartling/api-sdk-go"
@@ -256,7 +257,7 @@ func doFilesPush(
 						` the specified project`,
 				)
 			}
-			_, _ = os.Stderr.WriteString("Unable to upload file " + file)
+			_, _ = os.Stderr.WriteString("Unable to upload file " + file + "\n")
 			failedFiles = append(failedFiles, file)
 		} else {
 			status := "new"
@@ -283,12 +284,20 @@ func doFilesPush(
 }
 
 func returnError(err error) bool {
-	apiError, isApiError := err.(smartling.APIError)
-	_, isNotAuthorized := err.(smartling.NotAuthorizedError)
-	return isNotAuthorized ||
-		(isApiError && strings.Contains(strings.Join([]string{
-			"AUTHENTICATION_ERROR",
-			"AUTHORIZATION_ERROR",
-			"MAINTENANCE_MODE_ERROR",
-		}, ","), apiError.Code))
+	isNotAuthorized := err.Error() == "failed to upload original file: unable to authenticate: "+
+		"authentication parameters are invalid"
+	if isNotAuthorized {
+		return true
+	}
+
+	reasons := []string{
+		"AUTHENTICATION_ERROR",
+		"AUTHORIZATION_ERROR",
+		"MAINTENANCE_MODE_ERROR",
+	}
+
+	apiCode, _ := regexp.MatchString(
+		`(?s)Response Body:.+{.+"code":.+"`+strings.Join(reasons, "|")+`".+}.+Response Headers:`,
+		err.Error())
+	return apiCode
 }
