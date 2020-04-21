@@ -78,7 +78,7 @@ func getDirectoryFromPattern(mask string) (string, string) {
 	return matches[1], matches[2]
 }
 
-func globFilesLocally(
+func globFilesLocallyFunc(
 	directory string,
 	base string,
 	mask string,
@@ -139,3 +139,5 @@ func globFilesLocally(
 
 	return result, nil
 }
+
+var globFilesLocally = globFilesLocallyFunc
