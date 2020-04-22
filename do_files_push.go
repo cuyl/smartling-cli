@@ -257,7 +257,7 @@ func doFilesPush(
 						` the specified project`,
 				)
 			}
-			_, _ = os.Stderr.WriteString("Unable to upload file " + file + "\n")
+			_, _ = fmt.Fprintln(os.Stderr, "Unable to upload file "+file)
 			failedFiles = append(failedFiles, file)
 		} else {
 			status := "new"
