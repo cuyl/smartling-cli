@@ -284,9 +284,8 @@ func doFilesPush(
 }
 
 func returnError(err error) bool {
-	isNotAuthorized := err.Error() == "failed to upload original file: unable to authenticate: "+
-		"authentication parameters are invalid"
-	if isNotAuthorized {
+	if err.Error() == "failed to upload original file: unable to authenticate: "+
+		"authentication parameters are invalid" {
 		return true
 	}
 
