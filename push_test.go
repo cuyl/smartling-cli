@@ -2,9 +2,11 @@ package main
 
 import (
 	"bytes"
+	"errors"
 	"fmt"
 	smartling "github.com/Smartling/api-sdk-go"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/mock"
 	"io/ioutil"
 	"net/http"
 	"strings"
@@ -18,13 +20,26 @@ type request struct {
 
 type roundTripFunc func(req *http.Request) *http.Response
 
-func (f roundTripFunc) RoundTrip(req *http.Request) (*http.Response, error) {
-	return f(req), nil
+type MockSmartlingClient struct {
+	mock.Mock
 }
 
-func mockHttpClient(fn roundTripFunc) *http.Client {
+func (mock *MockSmartlingClient) UploadFile(
+	projectID string,
+	request smartling.FileUploadRequest,
+) (*smartling.FileUploadResult, error) {
+	args := mock.Called(projectID, request)
+	var result smartling.FileUploadResult
+	return &result, args.Error(1)
+}
+
+func (function roundTripFunc) RoundTrip(req *http.Request) (*http.Response, error) {
+	return function(req), nil
+}
+
+func mockHttpClient(function roundTripFunc) *http.Client {
 	return &http.Client{
-		Transport: fn,
+		Transport: function,
 	}
 }
 
@@ -42,105 +57,51 @@ func TestPushStopUnauthorized(t *testing.T) {
 
 	err := doFilesPush(&client, getConfig(), args)
 
-	assert.EqualError(
-		t,
-		err,
-		"ERROR: unable to upload file \"README.md\"\n"+
-			"└─ failed to upload original file: unable to authenticate: "+
-			"authentication parameters are invalid\n\n"+
-			"Check, that you have enough permissions to upload file to the specified project")
+	assert.True(t, errors.Is(err, smartling.NotAuthorizedError{}))
 }
 
 func TestPushContinueFakeError(t *testing.T) {
 	args := getArgs("README.md README.md")
 
-	responses := []request{{`{
-    "response": {
-        "code": "SUCCESS",
-        "data": {
-			"accessToken": "accessToken",
-			"refreshToken": "refreshToken"
-        }
-    }
-}`, 200},
-		{`{
-    "response": {
-        "code": "SUCCESS",
-        "data": {
-        }
-    }
-}`, 401},
-		{`{
-    "response": {
-        "code": "SUCCESS",
-        "data": {
-        }
-    }
-}`, 200},
-	}
-
-	httpClient := getMockHttpClient(responses)
-
 	mockGlobber(args)
 	defer func() {
 		globFilesLocally = globFilesLocallyFunc
 	}()
 
-	client := getClient(httpClient)
+	client := new(MockSmartlingClient)
+	client.On("UploadFile", "test", mock.Anything).
+		Return(nil, smartling.APIError{Cause: errors.New("some error")}).
+		Times(2)
 
-	err := doFilesPush(&client, getConfig(), args)
+	err := doFilesPush(client, getConfig(), args)
 	assert.EqualError(
 		t,
 		err,
-		"ERROR: failed to upload 1 files\n\nfailed to upload files README.md")
+		"ERROR: failed to upload 2 files\n\nfailed to upload files README.md, README.md")
+	client.AssertExpectations(t)
 }
 
 func TestPushStopApiError(t *testing.T) {
 	args := getArgs("README.md README.md")
 
-	responses := []request{{`{
-    "response": {
-        "code": "SUCCESS",
-        "data": {
-			"accessToken": "accessToken",
-			"refreshToken": "refreshToken"
-        }
-    }
-}`, 200},
-		{`{
-    "response": {
-        "code": "MAINTENANCE_MODE_ERROR",
-        "data": {
-			"accessToken": "accessToken",
-			"refreshToken": "refreshToken"
-        }
-    }
-}`, 500},
-		{`{
-    "response": {
-        "code": "SUCCESS",
-        "data": {
-			"accessToken": "accessToken",
-			"refreshToken": "refreshToken"
-        }
-    }
-}`, 200},
-	}
-
-	httpClient := getMockHttpClient(responses)
-
 	mockGlobber(args)
 	defer func() {
 		globFilesLocally = globFilesLocallyFunc
 	}()
 
-	client := getClient(httpClient)
+	client := new(MockSmartlingClient)
+	expectedError := smartling.APIError{
+		Cause: errors.New("some error"),
+		Code:  "MAINTENANCE_MODE_ERROR",
+	}
+	client.On("UploadFile", "test", mock.Anything).
+		Return(nil, expectedError).
+		Once()
 
-	err := doFilesPush(&client, getConfig(), args)
+	err := doFilesPush(client, getConfig(), args)
 
-	assert.Error(t, err)
-	assert.Contains(t, err.Error(), "ERROR: unable to upload file \"README.md\"\n"+
-		"└─ failed to upload original file: API call returned unexpected HTTP code: 500")
+	assert.True(t, errors.Is(err, expectedError))
+	client.AssertExpectations(t)
 }
 
 func getMockHttpClient(responses []request) *http.Client {

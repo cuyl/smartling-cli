@@ -16,6 +16,10 @@ func NewError(cause error, description string, args ...interface{}) Error {
 	}
 }
 
+func (err Error) Unwrap() error {
+	return err.Cause
+}
+
 func (err Error) Error() string {
 	return fmt.Sprintf(
 		"ERROR: %s\n\n%s",
