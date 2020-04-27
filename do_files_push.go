@@ -7,9 +7,6 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
-
-	"github.com/Smartling/api-sdk-go"
-	"github.com/reconquest/hierr-go"
 )
 
 func doFilesPush(
@@ -283,15 +280,20 @@ func returnError(err error) bool {
 		return true
 	}
 
-	if (errors.Is(err, smartling.APIError{})) {
-		reasons := map[string]struct{}{
-			"AUTHENTICATION_ERROR":   {},
-			"AUTHORIZATION_ERROR":    {},
-			"MAINTENANCE_MODE_ERROR": {},
-		}
-		_, ok := reasons[err.(smartling.APIError).Code]
-		return ok
-	}
+	for {
+		smartlingApiError, isSmartlingApiError := err.(smartling.APIError)
+		if isSmartlingApiError {
+			reasons := map[string]struct{}{
+				"AUTHENTICATION_ERROR":   {},
+				"AUTHORIZATION_ERROR":    {},
+				"MAINTENANCE_MODE_ERROR": {},
+			}
 
-	return false
+			_, stopExecution := reasons[smartlingApiError.Code]
+			return stopExecution
+		}
+		if err = errors.Unwrap(err); err == nil {
+			return false
+		}
+	}
 }
