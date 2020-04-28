@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"io/ioutil"
+	"os"
 	"path/filepath"
 	"strings"
 
@@ -12,12 +13,14 @@ import (
 )
 
 func doFilesPush(
-	client *smartling.Client,
+	client smartling.ClientInterface,
 	config Config,
 	args map[string]interface{},
 ) error {
 	var (
+		failedFiles   []string
 		project       = config.ProjectID
+		result        error
 		file, _       = args["<file>"].(string)
 		uri, useURI   = args["<uri>"].(string)
 		branch, _     = args["--branch"].(string)
@@ -241,32 +244,59 @@ func doFilesPush(
 		response, err := client.UploadFile(project, request)
 
 		if err != nil {
-			return NewError(
-				hierr.Errorf(
+			if returnError(err) {
+				return NewError(
 					err,
-					`unable to upload file "%s"`,
-					file,
-				),
+					fmt.Sprintf(`unable to upload file "%s"`, file),
+					`Check, that you have enough permissions to upload file to`+
+						` the specified project`,
+				)
+			}
+			_, _ = fmt.Fprintln(os.Stderr, "Unable to upload file "+file)
+			failedFiles = append(failedFiles, file)
+		} else {
+			status := "new"
+			if response.Overwritten {
+				status = "overwritten"
+			}
 
-				`Check, that you have enough permissions to upload file to`+
-					` the specified project`,
+			fmt.Printf(
+				"%s (%s) %s [%d strings %d words]\n",
+				uri,
+				request.FileType,
+				status,
+				response.StringCount,
+				response.WordCount,
 			)
 		}
-
-		status := "new"
-		if response.Overwritten {
-			status = "overwritten"
-		}
-
-		fmt.Printf(
-			"%s (%s) %s [%d strings %d words]\n",
-			uri,
-			request.FileType,
-			status,
-			response.StringCount,
-			response.WordCount,
-		)
 	}
 
-	return nil
+	if len(failedFiles) != 0 {
+		result = NewError(fmt.Errorf("failed to upload %d files", len(failedFiles)), "failed to upload files "+strings.Join(failedFiles, ", "))
+	}
+
+	return result
+}
+
+func returnError(err error) bool {
+	if errors.Is(err, smartling.NotAuthorizedError{}) {
+		return true
+	}
+
+	for {
+		smartlingApiError, isSmartlingApiError := err.(smartling.APIError)
+		if isSmartlingApiError {
+			reasons := map[string]struct{}{
+				"AUTHENTICATION_ERROR":   {},
+				"AUTHORIZATION_ERROR":    {},
+				"MAINTENANCE_MODE_ERROR": {},
+			}
+
+			_, stopExecution := reasons[smartlingApiError.Code]
+			return stopExecution
+		}
+		if err = errors.Unwrap(err); err == nil {
+			return false
+		}
+	}
 }
