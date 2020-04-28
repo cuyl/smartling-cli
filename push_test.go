@@ -9,6 +9,7 @@ import (
 	"github.com/stretchr/testify/mock"
 	"io/ioutil"
 	"net/http"
+	"smartling-cli/mocks"
 	"strings"
 	"testing"
 )
@@ -19,19 +20,6 @@ type request struct {
 }
 
 type roundTripFunc func(req *http.Request) *http.Response
-
-type MockSmartlingClient struct {
-	mock.Mock
-}
-
-func (mock *MockSmartlingClient) UploadFile(
-	projectID string,
-	request smartling.FileUploadRequest,
-) (*smartling.FileUploadResult, error) {
-	args := mock.Called(projectID, request)
-	var result smartling.FileUploadResult
-	return &result, args.Error(1)
-}
 
 func (function roundTripFunc) RoundTrip(req *http.Request) (*http.Response, error) {
 	return function(req), nil
@@ -68,7 +56,7 @@ func TestPushContinueFakeError(t *testing.T) {
 		globFilesLocally = globFilesLocallyFunc
 	}()
 
-	client := new(MockSmartlingClient)
+	client := &mocks.ClientInterface{}
 	client.On("UploadFile", "test", mock.Anything).
 		Return(nil, smartling.APIError{Cause: errors.New("some error")}).
 		Times(2)
@@ -89,7 +77,7 @@ func TestPushStopApiError(t *testing.T) {
 		globFilesLocally = globFilesLocallyFunc
 	}()
 
-	client := new(MockSmartlingClient)
+	client := &mocks.ClientInterface{}
 	expectedError := smartling.APIError{
 		Cause: errors.New("some error"),
 		Code:  "MAINTENANCE_MODE_ERROR",
