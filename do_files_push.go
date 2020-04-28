@@ -7,6 +7,9 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+
+	"github.com/Smartling/api-sdk-go"
+	"github.com/reconquest/hierr-go"
 )
 
 func doFilesPush(
