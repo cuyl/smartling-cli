@@ -6,7 +6,7 @@ import (
 	"path/filepath"
 	"text/tabwriter"
 
-	"github.com/Smartling/api-sdk-go"
+	smartling "github.com/Smartling/api-sdk-go"
 )
 
 func doFilesStatus(
