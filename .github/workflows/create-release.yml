@@ -33,22 +33,22 @@ jobs:
           go get -v -t -d ./...
           go mod vendor
 
+      - name: Get Tag version
+        id: tag_version
+        run: echo ::set-env name=VERSION::${GITHUB_REF#refs/tags/}
+
       - name: Build
-        env:
-          VERSION: ${{ github.ref }}
         run: |
           make build
 
       - name: Pack
-        env:
-          VERSION: ${{ github.ref }}
         run: |
-          filename=smartlin-cli-${{ env.VERSION }}-macos.tgz
-          tar -C smartlin-cli-macos -vzcf $filename bin/smartling.darwin
+          filename=smartlin-cli-${{ env.VERSION }}-darwin.zip
+          zip -j $filename bin/smartling.darwin
           shasum -a 256 $filename > $filename.sha256
 
-          filename=smartlin-cli-${{ env.VERSION }}-linux.tgz
-          tar -C smartlin-cli-linux -vzcf $filename bin/smartling.linux
+          filename=smartlin-cli-${{ env.VERSION }}-linux.zip
+          zip -j $filename bin/smartling.linux
           shasum -a 256 $filename > $filename.sha256
 
           filename=smartlin-cli-${{ env.VERSION }}-windows.zip
@@ -59,12 +59,11 @@ jobs:
         uses: softprops/action-gh-release@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          VERSION: ${{ github.ref }}
         if: startsWith(github.ref, 'refs/tags/')
         with:
           files: |
-            smartlin-cli-${{ env.VERSION }}-windows.zip
-            smartlin-cli-${{ env.VERSION }}-windows.zip.sha256
+            smartlin-cli-${{ env.VERSION }}-darwin.zip
+            smartlin-cli-${{ env.VERSION }}-darwin.zip.sha256
             smartlin-cli-${{ env.VERSION }}-linux.tgz
             smartlin-cli-${{ env.VERSION }}-linux.tgz.sha256
             smartlin-cli-${{ env.VERSION }}-windows.zip
