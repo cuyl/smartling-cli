@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
-	"smartling-cli/mocks"
+	"./mocks"
 	"strings"
 	"testing"
 
