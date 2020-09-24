@@ -16,7 +16,7 @@ import (
 	"github.com/reconquest/hierr-go"
 )
 
-var version = "1.5"
+var version string
 
 var usage = `smartling-cli - manage translation files using Smartling.
 
