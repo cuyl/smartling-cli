@@ -21,12 +21,21 @@ type FileConfig struct {
 	} `yaml:"push,omitempty"`
 }
 
+type LocaleConfig struct {
+	Application string `yaml:"application",required:"true"`
+	Smartling   string `yaml:"smartling",required:"true"`
+}
+
 type Config struct {
 	UserID    string `yaml:"user_id",required:"true"`
 	Secret    string `yaml:"secret",required:"true"`
 	AccountID string `yaml:"account_id"`
 	ProjectID string `yaml:"project_id,omitempty"`
 	Threads   int    `yaml:"threads"`
+
+	Locales   []LocaleConfig `yaml:"locales"`
+	LocaleToAppLocaleMap   map[string]string
+	AppLocaleToLocaleMap   map[string]string
 
 	Files map[string]FileConfig `yaml:"files"`
 
@@ -47,6 +56,15 @@ func NewConfig(path string) (Config, error) {
 		}
 
 		return config, err
+	}
+
+	if (config.Locales != nil && len(config.Locales) > 0) {
+		config.AppLocaleToLocaleMap = make(map[string]string)
+		config.LocaleToAppLocaleMap = make(map[string]string)
+		for _, locale := range config.Locales {
+			config.AppLocaleToLocaleMap[locale.Application] = locale.Smartling
+			config.LocaleToAppLocaleMap[locale.Smartling] = locale.Application
+		}
 	}
 
 	return config, nil

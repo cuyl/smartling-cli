@@ -18,6 +18,7 @@ func downloadFileTranslations(
 ) error {
 	var (
 		project   = config.ProjectID
+		LocaleToAppLocaleMap = config.LocaleToAppLocaleMap
 		directory = args["--directory"].(string)
 		source    = args["--source"].(bool)
 		locales   = args["--locale"].([]string)
@@ -96,14 +97,20 @@ func downloadFileTranslations(
 			}
 		}
 
+		AppLocale := locale.LocaleID
+		if _AppLocale, ok := LocaleToAppLocaleMap[locale.LocaleID]; ok {
+			AppLocale = _AppLocale
+		}
+
 		path, err := executeFileFormat(
 			config,
 			file,
 			format,
 			useFormat,
 			map[string]interface{}{
-				"FileURI": file.FileURI,
-				"Locale":  locale.LocaleID,
+				"AppLocale": AppLocale,
+				"FileURI":   file.FileURI,
+				"Locale":    locale.LocaleID,
 			},
 		)
 		if err != nil {
