@@ -14,9 +14,9 @@ func doFilesPull(
 		uri, _  = args["<uri>"].(string)
 	)
 
-	if args["--format"] == nil {
-		args["--format"] = defaultFilePullFormat
-	}
+	// if args["--format"] == nil {
+	// 	args["--format"] = defaultFilePullFormat
+	// }
 
 	var (
 		err   error
