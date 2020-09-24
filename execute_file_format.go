@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/Smartling/api-sdk-go"
+	smartling "github.com/Smartling/api-sdk-go"
 )
 
 var (

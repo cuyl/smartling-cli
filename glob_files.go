@@ -7,7 +7,7 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/Smartling/api-sdk-go"
+	smartling "github.com/Smartling/api-sdk-go"
 	"github.com/gobwas/glob"
 	"github.com/reconquest/hierr-go"
 )

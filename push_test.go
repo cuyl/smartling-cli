@@ -4,14 +4,15 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
-	smartling "github.com/Smartling/api-sdk-go"
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/mock"
 	"io/ioutil"
 	"net/http"
 	"smartling-cli/mocks"
 	"strings"
 	"testing"
+
+	smartling "github.com/Smartling/api-sdk-go"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/mock"
 )
 
 type request struct {
