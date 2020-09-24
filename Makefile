@@ -59,4 +59,4 @@ _pkg-init:
 		$(shell git rev-list --count HEAD).$(shell git rev-parse --short HEAD))
 
 %:
-	GOOS=$(basename $@) go build -o bin/smartling.$@
+	GOOS=$(basename $@) go build -ldflags "-X main.version=$(VERSION)" -o bin/smartling.$@ 
