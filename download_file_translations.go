@@ -17,6 +17,7 @@ func downloadFileTranslations(
 	file smartling.File,
 ) error {
 	var (
+		branch, useBranch = args["--branch"].(string)
 		project   = config.ProjectID
 		LocaleToAppLocaleMap = config.LocaleToAppLocaleMap
 		directory = args["--directory"].(string)
@@ -27,6 +28,11 @@ func downloadFileTranslations(
 		progress, _         = args["--progress"].(string)
 		retrieve, _         = args["--retrieve"].(string)
 	)
+
+	targetFileUIR := file.FileURI
+	if useBranch {
+		targetFileUIR = strings.TrimPrefix(file.FileURI, branch + "/")
+	}
 
 	progress = strings.TrimSuffix(progress, "%")
 	if progress == "" {
@@ -109,7 +115,7 @@ func downloadFileTranslations(
 			useFormat,
 			map[string]interface{}{
 				"AppLocale": AppLocale,
-				"FileURI":   file.FileURI,
+				"FileURI":   targetFileUIR,
 				"Locale":    locale.LocaleID,
 			},
 		)

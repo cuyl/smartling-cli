@@ -10,6 +10,7 @@ func doFilesPull(
 	args map[string]interface{},
 ) error {
 	var (
+		branch, useBranch   = args["--branch"].(string)
 		project = config.ProjectID
 		uri, _  = args["<uri>"].(string)
 	)
@@ -29,6 +30,9 @@ func doFilesPull(
 			return err
 		}
 	} else {
+		if useBranch {
+			uri = branch + "/**"
+		}
 		files, err = globFilesRemote(client, project, uri)
 		if err != nil {
 			return err
