@@ -34,7 +34,7 @@ Usage:
   smartling-cli [options] [-v]... files list --help
   smartling-cli [options] [-v]... files list [--format=] [--short] [<uri>]
   smartling-cli [options] [-v]... files (pull|get) --help
-  smartling-cli [options] [-v]... files (pull|get) [--locale=]... [--directory=] [--source] [--format=]
+  smartling-cli [options] [-v]... files (pull|get) [--locale=]... [--directory=] [--source] [--format=] [--branch=]
                                                [--progress=] [--retrieve=] [<uri>]
   smartling-cli [options] [-v]... files push --help
   smartling-cli [options] [-v]... files push [(--authorize|--locale=...)] [--branch=] [--type=]
@@ -46,9 +46,13 @@ Usage:
   smartling-cli [options] [-v]... files delete --help
   smartling-cli [options] [-v]... files delete <uri>
   smartling-cli [options] [-v]... files import --help
-  smartling-cli [options] [-v]... files import <uri> <file> <locale>
+	smartling-cli [options] [-v]... files import <uri> <file> <locale>
                                            [(--published|--post-translation)]
                                            [--type=] [--overwrite]
+  smartling-cli [options] [-v]... files import --help
+	smartling-cli [options] [-v]... files upload-translation [uri]
+                                           [(--published|--post-translation)] [--branch=]
+                                           [--type=] [--overwrite] [--source-locale=] 
   smartling-cli --help
 
 Commands:
@@ -76,6 +80,7 @@ Commands:
     --format <format>     Specifies format to use for file list output.
                            [default: $FILE_LIST_FORMAT]
    pull <uri>             Pulls specified files from server.
+    -b --branch <branch>  Prepend specified text to the file uri.
     --source              Pulls source file as well.
     --progress <done>     Pulls only translations that are at least specified
                            percent of work complete.
@@ -108,6 +113,13 @@ Commands:
                            published.
     --type <type>         Specify file type. If option is not given, file type
                            will be deduced from extension.
+    --overwrite           Overwrite any existing translations.
+   upload-translation <uri>   Upload matched files translations
+    -b --branch <branch>  Prepend specified text to the file uri.
+    --published           Translated content will be published.
+    --post-translation    Translated content will be imported into first step
+                           of translation. If there are none, it will be
+                           published.
     --overwrite           Overwrite any existing translations.
 
 
@@ -529,6 +541,9 @@ func doFiles(config Config, args map[string]interface{}) error {
 
 	case args["import"].(bool):
 		return doFilesImport(client, config, args)
+
+	case args["upload-translation"].(bool):
+		return doFilesTranslationUpdate(client, config, args)
 	}
 
 	return nil
