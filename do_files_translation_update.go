@@ -1,12 +1,15 @@
 package main
 
 import (
-	"fmt"
+	"context"
 	"io/ioutil"
 	"os"
 	"path/filepath"
+	"time"
 
 	"strings"
+
+	rate "golang.org/x/time/rate"
 
 	smartling "github.com/Smartling/api-sdk-go"
 	"github.com/gobwas/glob"
@@ -79,15 +82,19 @@ func doFilesTranslationUpdate(
 		return err
 	}
 
+	if len(files) == 0 {
+		logger.Infof("No files found %s", uri)
+	}
+
 	var globConfigList []GlobConfigPair
 	for pattern, section := range config.Files {
 		pattern, err := glob.Compile(pattern, '/')
 		if err != nil {
-			NewError(
+			logger.Error(NewError(
 				err,
 				"Search file URI is malformed. Check out help for more "+
 					"information about search patterns.",
-			)
+			))
 			continue
 		}
 		globConfigList = append(globConfigList, GlobConfigPair {
@@ -126,6 +133,9 @@ func doFilesTranslationUpdate(
 						},
 					)
 					if err != nil {
+						logger.Error(hierr.Errorf(err, "format failed"),
+							"Check that specified file format syntax.",
+						)
 						continue
 					}
 					if _, err := os.Stat(filepath.Join(filepath.Dir(config.path), path)); err == nil {
@@ -134,15 +144,21 @@ func doFilesTranslationUpdate(
 							TranslationFile: path,
 							Locale:          locale.LocaleID,
 						})
-						
+					} else {
+						logger.Infof("File not found: %s", path)
 					}
 				}
 			}
 		}
 	}
+	if len(uploadItems) == 0 {
+		logger.Infof("No items found %s", uri)
+	}
 
 	pool := NewThreadPool(config.Threads)
 
+	rl := rate.NewLimiter(rate.Every(60*time.Second), 50)
+	ctx := context.Background()
 	for _, item := range uploadItems {
 		// func closure required to pass different file objects to goroutines
 		func(item UploadItem) {
@@ -172,11 +188,13 @@ func doFilesTranslationUpdate(
 				if args["--overwrite"].(bool) {
 					request.Overwrite = true
 				}
-				logger.Infof("upload translations params: FileURI: %s TranslationState: %s Overwrite: %t",
-				request.FileURI,
-				request.TranslationState,
-				request.Overwrite,
-			  )
+				logger.Debugf("upload translations params: FileURI: %s TranslationState: %s Overwrite: %t",
+					request.FileURI,
+					request.TranslationState,
+					request.Overwrite,
+				)
+
+				rl.Wait(ctx)
 				result, err := client.Import(project, item.Locale, request)
 
 				if err != nil {
@@ -187,17 +205,27 @@ func doFilesTranslationUpdate(
 						item.SourceFile.FileURI,
 					))
 				}
-			
-				fmt.Printf(
-					"%s imported [%d strings %d words]\n",
+				if len(result.TranslationImportErrors) != 0 {
+					for _, importErrorItem := range result.TranslationImportErrors {
+						logger.Warningf(
+							"[%s] key: %s messages: %v hash: %s",
+							item.TranslationFile,
+							importErrorItem.ImportKey,
+							importErrorItem.Messages,
+							importErrorItem.StringHashcode,
+						)
+					}
+				}
+				logger.Infof(
+					"%s imported [%d strings %d words]",
 					item.TranslationFile,
 					result.StringCount,
 					result.WordCount,
 				)
-			})
-		}(item)
-	}
 
+			})
+			}(item)
+		}
 	pool.Wait()
 
 	return nil

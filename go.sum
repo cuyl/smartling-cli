@@ -2,6 +2,10 @@ github.com/BurntSushi/toml v0.3.1 h1:WXkYYl6Yr3qBf1K79EBnL4mak0OimBfB0XUf9Vl28OQ
 github.com/BurntSushi/toml v0.3.1/go.mod h1:xHWCNGjB5oqiDr8zfno3MHue2Ht5sIBksp03qcyfWMU=
 github.com/Smartling/api-sdk-go v0.0.0-20200428111932-35139033a212 h1:3WSu2eGmRWBWQ3z3WT8AUl8Cy5KXidG07d9VimYJoj4=
 github.com/Smartling/api-sdk-go v0.0.0-20200428111932-35139033a212/go.mod h1:HxAayxrUfrxNBc2rOVyA0S0SP7j0IxPeuuZo2s8Lr5w=
+github.com/cuyl/api-sdk-go v0.0.0-20201014102754-c17cbf2803aa h1:Aub/J2NQ8XBuSnRmUfevTSj1UzmCLa37eX7bEj+0G2Y=
+github.com/cuyl/api-sdk-go v0.0.0-20201014102754-c17cbf2803aa/go.mod h1:HxAayxrUfrxNBc2rOVyA0S0SP7j0IxPeuuZo2s8Lr5w=
+github.com/cuyl/api-sdk-go v0.0.0-20201015021753-b978e930d84f h1:/OeYT2KwUAfF5G20keE7s6NKBiLHW3XPDrsFafyr3qo=
+github.com/cuyl/api-sdk-go v0.0.0-20201015021753-b978e930d84f/go.mod h1:HxAayxrUfrxNBc2rOVyA0S0SP7j0IxPeuuZo2s8Lr5w=
 github.com/davecgh/go-spew v1.1.0 h1:ZDRjVQ15GmhC3fiQ8ni8+OwkZQO4DARzQgrnXU1Liz8=
 github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/docopt/docopt-go v0.0.0-20180111231733-ee0de3bc6815 h1:bWDMxwH3px2JBh6AyO7hdCn/PkvCZXii8TGj7sbtEbQ=
@@ -42,6 +46,8 @@ golang.org/x/sys v0.0.0-20190215142949-d0b11bdaac8a/go.mod h1:STP8DvDyc/dI5b8T5h
 golang.org/x/sys v0.0.0-20190412213103-97732733099d h1:+R4KGOnez64A81RvjARKc4UT5/tI9ujCIVX+P5KiHuI=
 golang.org/x/sys v0.0.0-20190412213103-97732733099d/go.mod h1:h1NjWce9XRLGQEsW7wpKNCjG9DtNlClVuFLEZdDNbEs=
 golang.org/x/text v0.3.0/go.mod h1:NqM8EUOU14njkJ3fqMW+pc6Ldnwhi/IjpwHt7yyuwOQ=
+golang.org/x/time v0.0.0-20200630173020-3af7569d3a1e h1:EHBhcS0mlXEAVwNyO2dLfjToGsyY4j24pTs2ScHnX7s=
+golang.org/x/time v0.0.0-20200630173020-3af7569d3a1e/go.mod h1:tRJNPiyCQ0inRvYxbN9jk5I+vvW/OXSQhTDSoE431IQ=
 gopkg.in/check.v1 v0.0.0-20161208181325-20d25e280405 h1:yhCVgyC4o1eVCa2tZl7eS0r+SDo693bJlVdllGtEeKM=
 gopkg.in/check.v1 v0.0.0-20161208181325-20d25e280405/go.mod h1:Co6ibVJAznAaIkqp8huTwlJQCZ016jof/cbN4VW5Yz0=
 gopkg.in/yaml.v2 v2.3.0 h1:clyUAQHOM3G0M3f5vQj7LuJrETvjVot3Z5el9nffUtU=

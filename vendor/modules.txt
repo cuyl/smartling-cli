@@ -1,6 +1,6 @@
 # github.com/BurntSushi/toml v0.3.1
 ## explicit
-# github.com/Smartling/api-sdk-go v0.0.0-20200428111932-35139033a212
+# github.com/Smartling/api-sdk-go v0.0.0-20200428111932-35139033a212 => github.com/cuyl/api-sdk-go v0.0.0-20201015021753-b978e930d84f
 ## explicit
 github.com/Smartling/api-sdk-go
 # github.com/davecgh/go-spew v1.1.0
@@ -60,8 +60,12 @@ golang.org/x/crypto/ssh/terminal
 # golang.org/x/sys v0.0.0-20190412213103-97732733099d
 golang.org/x/sys/unix
 golang.org/x/sys/windows
+# golang.org/x/time v0.0.0-20200630173020-3af7569d3a1e
+## explicit
+golang.org/x/time/rate
 # gopkg.in/yaml.v2 v2.3.0
 ## explicit
 gopkg.in/yaml.v2
 # gopkg.in/yaml.v3 v3.0.0-20200313102051-9f266ea9e77c
 gopkg.in/yaml.v3
+# github.com/Smartling/api-sdk-go => github.com/cuyl/api-sdk-go v0.0.0-20201015021753-b978e930d84f

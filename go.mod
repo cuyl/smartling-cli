@@ -15,5 +15,8 @@ require (
 	github.com/tcnksm/go-input v0.0.0-20180404061846-548a7d7a8ee8
 	github.com/zazab/zhash v0.0.0-20170403032415-ad45b89afe7a // indirect
 	golang.org/x/crypto v0.0.0-20200820211705-5c72a883971a // indirect
+	golang.org/x/time v0.0.0-20200630173020-3af7569d3a1e
 	gopkg.in/yaml.v2 v2.3.0
 )
+
+replace github.com/Smartling/api-sdk-go => github.com/cuyl/api-sdk-go v0.0.0-20201015021753-b978e930d84f
