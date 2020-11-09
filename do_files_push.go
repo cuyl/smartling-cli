@@ -187,6 +187,10 @@ func doFilesPush(
 				`Check that file exists and readable by current user.`,
 			)
 		}
+		if len(contents) == 0 {
+			fmt.Fprintf(os.Stderr, "%s skipped empty file.", file)
+			continue
+		}
 
 		request := smartling.FileUploadRequest{
 			File:               contents,
@@ -252,6 +256,7 @@ func doFilesPush(
 						` the specified project`,
 				)
 			}
+			fmt.Fprintf(os.Stderr,"%+v\n",err)
 			_, _ = fmt.Fprintln(os.Stderr, "Unable to upload file "+file)
 			failedFiles = append(failedFiles, file)
 		} else {
