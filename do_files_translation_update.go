@@ -157,7 +157,7 @@ func doFilesTranslationUpdate(
 
 	pool := NewThreadPool(config.Threads)
 
-	rl := rate.NewLimiter(rate.Every(2*time.Second), 1)
+	rl := rate.NewLimiter(rate.Every(time.Millisecond*1500), 1)
 	ctx := context.Background()
 	for _, item := range uploadItems {
 		// func closure required to pass different file objects to goroutines
