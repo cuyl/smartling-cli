@@ -23,7 +23,7 @@ func doFilesPush(
 		result        error
 		file, _       = args["<file>"].(string)
 		uri, useURI   = args["<uri>"].(string)
-		branch, _     = args["--branch"].(string)
+		branch, useBranch = args["--branch"].(string)
 		locales, _    = args["--locale"].([]string)
 		authorize     = args["--authorize"].(bool)
 		directory     = args["--directory"].(string)
@@ -119,8 +119,15 @@ func doFilesPush(
 	}
 
 	base = filepath.Dir(base)
-
+	dset := map[string]bool{}
 	for _, file := range files {
+		if _, ok := dset[file]; ok {
+			logger.Debugf("skip: %s\n", file)
+			continue
+		} else {
+			dset[file] = true
+		}
+
 		name, err := filepath.Abs(file)
 		if err != nil {
 			return NewError(
@@ -245,6 +252,14 @@ func doFilesPush(
 			request.Smartling.Directives[spec[0]] = spec[1]
 		}
 
+		if _, ok := request.Smartling.Directives["namespace"]; ok == false && useBranch {
+			if request.Smartling.Directives == nil {
+				request.Smartling.Directives = map[string]string{}
+			}
+			request.Smartling.Directives["namespace"] = uri
+		}
+
+		logger.Debugf("namespace: %s\n", request.Smartling.Directives["namespace"])
 		response, err := client.UploadFile(project, request)
 
 		if err != nil {

@@ -30,6 +30,7 @@ type GlobConfigPair struct {
 	Config FileConfig
 }
 
+// UploadItem is ...
 type UploadItem struct {
 	SourceFile smartling.File
 	TranslationFile string
@@ -43,12 +44,12 @@ func doFilesTranslationUpdate(
 ) error {
 	var (
 		project     = config.ProjectID
-		uri, useUri   = args["[uri]"].(string)
+		uri, useURI = args["[uri]"].(string)
 		// sourceLocale string
 		branch, useBranch   = args["--branch"].(string)
 		
 	)
-	if !useUri || uri == "" {
+	if !useURI || uri == "" {
 		uri = "**"
 	}
 	if useBranch {
