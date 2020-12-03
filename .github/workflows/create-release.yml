@@ -30,7 +30,7 @@ jobs:
 
       - name: Get Tag version
         id: tag_version
-        run: echo ::set-env name=VERSION::${GITHUB_REF#refs/tags/}
+        run: echo VERSION=${GITHUB_REF#refs/tags/} >> $GITHUB_ENV
 
       - name: Build
         run: |
