@@ -256,7 +256,10 @@ func doFilesPush(
 			if request.Smartling.Directives == nil {
 				request.Smartling.Directives = map[string]string{}
 			}
-			request.Smartling.Directives["namespace"] = uri
+
+			fileName := filepath.Base(file)
+			fileName = strings.TrimSuffix(fileName, filepath.Ext(fileName))
+			request.Smartling.Directives["namespace"] = fileName
 		}
 
 		logger.Debugf("namespace: %s\n", request.Smartling.Directives["namespace"])
@@ -281,8 +284,9 @@ func doFilesPush(
 			}
 
 			fmt.Printf(
-				"%s (%s) %s [%d strings %d words]\n",
+				"%s (namespace:%s type:%s) %s [%d strings %d words]\n",
 				uri,
+				request.Smartling.Directives["namespace"],
 				request.FileType,
 				status,
 				response.StringCount,
