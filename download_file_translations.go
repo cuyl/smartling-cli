@@ -10,6 +10,12 @@ import (
 	"github.com/reconquest/hierr-go"
 )
 
+type formatData struct {
+	AppLocale  string
+	FileURI    string
+	Locale     string
+}
+
 func downloadFileTranslations(
 	client *smartling.Client,
 	config Config,
@@ -107,16 +113,16 @@ func downloadFileTranslations(
 		if _AppLocale, ok := LocaleToAppLocaleMap[locale.LocaleID]; ok {
 			AppLocale = _AppLocale
 		}
-
+		file.FileURI = targetFileUIR
 		path, err := executeFileFormat(
 			config,
 			file,
 			format,
 			useFormat,
-			map[string]interface{}{
-				"AppLocale": AppLocale,
-				"FileURI":   targetFileUIR,
-				"Locale":    locale.LocaleID,
+			formatData {
+				AppLocale: AppLocale,
+				FileURI:   targetFileUIR,
+				Locale:    locale.LocaleID,
 			},
 		)
 		if err != nil {
