@@ -35,9 +35,9 @@ func downloadFileTranslations(
 		retrieve, _         = args["--retrieve"].(string)
 	)
 
-	targetFileUIR := file.FileURI
+	targetFileURI := file.FileURI
 	if useBranch {
-		targetFileUIR = strings.TrimPrefix(file.FileURI, branch + "/")
+		targetFileURI = strings.TrimPrefix(file.FileURI, branch + "/")
 	}
 
 	progress = strings.TrimSuffix(progress, "%")
@@ -113,7 +113,8 @@ func downloadFileTranslations(
 		if _AppLocale, ok := LocaleToAppLocaleMap[locale.LocaleID]; ok {
 			AppLocale = _AppLocale
 		}
-		file.FileURI = targetFileUIR
+		FileURI := file.FileURI
+		file.FileURI = targetFileURI
 		path, err := executeFileFormat(
 			config,
 			file,
@@ -121,10 +122,11 @@ func downloadFileTranslations(
 			useFormat,
 			formatData {
 				AppLocale: AppLocale,
-				FileURI:   targetFileUIR,
+				FileURI:   targetFileURI,
 				Locale:    locale.LocaleID,
 			},
 		)
+		file.FileURI = FileURI
 		if err != nil {
 			return err
 		}
